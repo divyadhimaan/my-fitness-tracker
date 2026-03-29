@@ -1,7 +1,0 @@
-{
-  "/checkin/page": "app/checkin/page.js",
-  "/page": "app/page.js",
-  "/workouts/page": "app/workouts/page.js",
-  "/daily/page": "app/daily/page.js",
-  "/diet/page": "app/diet/page.js"
-}

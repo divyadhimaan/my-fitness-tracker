@@ -8,6 +8,7 @@ const LINKS = [
   { href: '/diet', label: 'Diet', emoji: '🥗' },
   { href: '/checkin', label: 'Check-in', emoji: '📊' },
   { href: '/daily', label: 'Daily', emoji: '📅' },
+  { href: '/dashboard', label: 'Dashboard', emoji: '📈' },
 ]
 
 export default function Nav() {

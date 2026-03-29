@@ -1,19 +1,7 @@
 'use client'
-import { useState } from 'react'
-import { useLocalStorage } from '@/lib/useLocalStorage'
+import { useState, useRef, useEffect } from 'react'
+import { fetchAllCheckins, saveCheckin, CheckinData } from '@/lib/api'
 import { CHECKIN_FIELDS, MILESTONES, PHASES } from '@/lib/data'
-
-interface WeekData {
-  [field: string]: string
-  workout: string
-  diet: string
-  notes: string
-}
-
-const emptyWeek = (): WeekData => ({
-  weight: '', waist: '', hips: '', chest: '', rightArm: '', rightQuad: '', rightCalf: '',
-  workout: '', diet: '', notes: '',
-})
 
 const phaseForWeek = (w: number) => {
   if (w <= 3) return PHASES[0]
@@ -23,30 +11,45 @@ const phaseForWeek = (w: number) => {
 }
 
 export default function CheckinPage() {
-  const [data, setData] = useLocalStorage<WeekData[]>(
-    'divya-checkins',
-    Array.from({ length: 12 }, emptyWeek)
+  const [data, setData] = useState<CheckinData[]>(
+    Array.from({ length: 12 }, (_, i) => ({
+      week: i, weight: '', waist: '', hips: '',
+      chest: '', rightArm: '', rightQuad: '', rightCalf: '',
+      workout: '', diet: '', notes: '',
+    }))
   )
   const [activeWeek, setActiveWeek] = useState(0)
+  const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    fetchAllCheckins().then(rows => {
+      if (rows.length > 0) {
+        setData(prev => prev.map((p, i) => rows.find(r => r.week === i) ?? p))
+      }
+    })
+  }, [])
 
   const update = (field: string, value: string) => {
     setData(prev => {
-      const next = [...prev]
-      next[activeWeek] = { ...next[activeWeek], [field]: value }
+      const next = prev.map((w, i) => i === activeWeek ? { ...w, [field]: value } : w)
+      if (saveTimer.current) clearTimeout(saveTimer.current)
+      saveTimer.current = setTimeout(async () => {
+        setSaving(true)
+        setSaved(false)
+        await saveCheckin(next[activeWeek])
+        setSaving(false)
+        setSaved(true)
+        setTimeout(() => setSaved(false), 2000)
+      }, 800)
       return next
     })
   }
 
-  const handleSave = () => {
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
-  }
-
-  const current = data[activeWeek] ?? emptyWeek()
+  const current = data[activeWeek]
   const phase = phaseForWeek(activeWeek + 1)
 
-  // Weight trend calculation
   const weights = data.map(d => parseFloat(d.weight)).filter(Boolean)
   const startWeight = 66.7
   const latestWeight = weights.length > 0 ? weights[weights.length - 1] : startWeight
@@ -78,15 +81,13 @@ export default function CheckinPage() {
         <div className="grid grid-cols-6 gap-1.5">
           {Array.from({ length: 12 }, (_, i) => {
             const p = phaseForWeek(i + 1)
-            const hasData = data[i] && Object.values(CHECKIN_FIELDS).some(f => data[i][f.key])
+            const hasData = data[i] && CHECKIN_FIELDS.some(f => data[i][f.key as keyof CheckinData])
             return (
               <button
                 key={i}
                 onClick={() => setActiveWeek(i)}
                 className={`rounded-xl py-2 text-center text-xs transition-all font-semibold relative ${
-                  activeWeek === i
-                    ? 'text-white shadow-sm'
-                    : 'bg-[#F0EDE8] text-[#5A524A]'
+                  activeWeek === i ? 'text-white shadow-sm' : 'bg-[#F0EDE8] text-[#5A524A]'
                 }`}
                 style={activeWeek === i ? { background: p.color } : {}}
               >
@@ -101,19 +102,13 @@ export default function CheckinPage() {
       </div>
 
       {/* Week header */}
-      <div
-        className="rounded-2xl p-4 border-l-4"
-        style={{ background: phase.bg, borderColor: phase.color }}
-      >
+      <div className="rounded-2xl p-4 border-l-4" style={{ background: phase.bg, borderColor: phase.color }}>
         <div className="flex items-center justify-between">
           <div>
             <div className="font-semibold text-sm">Week {activeWeek + 1}</div>
             <div className="text-xs text-[#9A9087] mt-0.5">Phase {phase.id}: {phase.label} · Weeks {phase.weeks}</div>
           </div>
-          <span
-            className="text-xs font-semibold px-3 py-1 rounded-full text-white"
-            style={{ background: phase.color }}
-          >
+          <span className="text-xs font-semibold px-3 py-1 rounded-full text-white" style={{ background: phase.color }}>
             {phase.label}
           </span>
         </div>
@@ -139,7 +134,7 @@ export default function CheckinPage() {
                 <input
                   type="number"
                   step="0.1"
-                  value={current[f.key] ?? ''}
+                  value={current[f.key as keyof CheckinData] ?? ''}
                   onChange={e => update(f.key, e.target.value)}
                   placeholder="—"
                   className="w-full text-base font-semibold bg-transparent outline-none border-b border-[#EDE8E3] pb-1 focus:border-[#E8B4A0]"
@@ -157,7 +152,7 @@ export default function CheckinPage() {
         <div className="space-y-3">
           {[
             { key: 'workout', label: 'Workout effort this week', icon: '🏋️' },
-            { key: 'diet', label: 'Diet adherence this week', icon: '🥗' },
+            { key: 'diet',    label: 'Diet adherence this week', icon: '🥗' },
           ].map(item => (
             <div key={item.key} className="card">
               <div className="text-xs text-[#9A9087] mb-2">{item.icon} {item.label}</div>
@@ -167,7 +162,7 @@ export default function CheckinPage() {
                     key={n}
                     onClick={() => update(item.key, String(n))}
                     className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                      current[item.key] === String(n)
+                      current[item.key as keyof CheckinData] === String(n)
                         ? 'bg-[#2A2520] text-[#F5EFE8]'
                         : 'bg-[#F0EDE8] text-[#9A9087] hover:bg-[#E8E3DC]'
                     }`}
@@ -193,15 +188,14 @@ export default function CheckinPage() {
         />
       </div>
 
-      {/* Save button */}
-      <button
-        onClick={handleSave}
-        className={`w-full py-4 rounded-2xl font-semibold text-sm transition-all ${
-          saved ? 'bg-[#A0C4B8] text-white' : 'bg-[#2A2520] text-[#F5EFE8] hover:bg-[#3A3530]'
-        }`}
-      >
-        {saved ? '✓ Saved!' : 'Save Week ' + (activeWeek + 1)}
-      </button>
+      {/* Save indicator */}
+      <div className={`w-full py-4 rounded-2xl font-semibold text-sm text-center transition-all ${
+        saved   ? 'bg-[#A0C4B8] text-white' :
+        saving  ? 'bg-[#F0EDE8] text-[#9A9087]' :
+                  'bg-[#2A2520] text-[#F5EFE8]'
+      }`}>
+        {saved ? '✓ Saved!' : saving ? 'Saving…' : `Week ${activeWeek + 1} — auto-saves as you type`}
+      </div>
 
       {/* 12-week table */}
       <div>
@@ -223,9 +217,10 @@ export default function CheckinPage() {
                 return (
                   <tr
                     key={i}
-                    className={`border-b border-[#EDE8E3] cursor-pointer transition-colors
-                      ${activeWeek === i ? 'bg-[#FFF8F0]' : i % 2 === 0 ? 'bg-white' : 'bg-[#FAFAF8]'}`}
                     onClick={() => setActiveWeek(i)}
+                    className={`border-b border-[#EDE8E3] cursor-pointer transition-colors ${
+                      activeWeek === i ? 'bg-[#FFF8F0]' : i % 2 === 0 ? 'bg-white' : 'bg-[#FAFAF8]'
+                    }`}
                   >
                     <td className="px-3 py-2 font-semibold">W{i + 1}</td>
                     <td className="px-2 py-2 text-center">
@@ -237,8 +232,8 @@ export default function CheckinPage() {
                       </span>
                     </td>
                     <td className="px-2 py-2 text-center text-[#5A524A]">{w.weight ? `${w.weight} kg` : '—'}</td>
-                    <td className="px-2 py-2 text-center text-[#5A524A]">{w.waist ? `${w.waist}"` : '—'}</td>
-                    <td className="px-2 py-2 text-center text-[#5A524A]">{w.hips ? `${w.hips}"` : '—'}</td>
+                    <td className="px-2 py-2 text-center text-[#5A524A]">{w.waist  ? `${w.waist}"` : '—'}</td>
+                    <td className="px-2 py-2 text-center text-[#5A524A]">{w.hips   ? `${w.hips}"` : '—'}</td>
                   </tr>
                 )
               })}

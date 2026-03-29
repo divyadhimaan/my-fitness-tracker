@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body { font-family: Georgia, serif; }
+}
+
+@layer components {
+  .card {
+    @apply bg-white border border-[#EDE8E3] rounded-2xl p-4;
+  }
+  .badge {
+    @apply inline-flex items-center rounded-full px-3 py-0.5 text-xs font-semibold;
+  }
+  .btn {
+    @apply rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200 cursor-pointer border-none;
+  }
+  .btn-dark {
+    @apply btn bg-[#2A2520] text-[#F5EFE8] hover:bg-[#3A3530];
+  }
+  .btn-outline {
+    @apply btn bg-[#F0EDE8] text-[#5A524A] hover:bg-[#E8E3DC];
+  }
+  .section-label {
+    @apply text-[10px] tracking-[3px] text-[#9A9087] uppercase mb-3;
+  }
+}

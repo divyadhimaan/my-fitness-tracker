@@ -83,3 +83,44 @@ export interface DayLog {
       body: JSON.stringify({ date }),
     })
   }
+
+  export interface SetEntry {
+    setNumber: number
+    reps: string
+    weight: string   // kg, or 'BW' for bodyweight
+  }
+  
+  export interface ExerciseLog {
+    name: string
+    sets: SetEntry[]
+    notes: string
+  }
+  
+  export interface WorkoutLog {
+    date: string
+    day: string          // 'A' | 'B' | 'C' | 'D'
+    phase: string        // 'phase1' | 'phase2'
+    exercises: ExerciseLog[]
+    duration: number     // minutes
+    completed: boolean
+  }
+  
+  export async function fetchWorkoutLog(date: string): Promise<WorkoutLog | null> {
+    const res = await fetch(`/api/workouts?date=${date}`)
+    if (!res.ok) return null
+    return res.json()
+  }
+  
+  export async function fetchAllWorkoutLogs(): Promise<WorkoutLog[]> {
+    const res = await fetch('/api/workouts')
+    if (!res.ok) return []
+    return res.json()
+  }
+  
+  export async function saveWorkoutLog(log: WorkoutLog): Promise<void> {
+    await fetch('/api/workouts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(log),
+    })
+  }

@@ -1,0 +1,5 @@
+export const DB_NAME = "divya-fitness"
+export const CHECKIN_COL = "checkins"
+export const DAILY_LOGS_COL = "daily-logs"
+export const WEIGHT_LOG_COL = "weight-log"
+export const WORKOUT_LOG_COL = "workout-logs"

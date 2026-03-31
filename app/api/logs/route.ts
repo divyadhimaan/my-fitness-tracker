@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import clientPromise from '@/lib/mongodb'
-
-const DB = 'divya-fitness'
-const COL = 'daily-logs'
+import { DB_NAME, DAILY_LOGS_COL } from "@/lib/constants"
 
 export async function GET(req: NextRequest) {
   const date = req.nextUrl.searchParams.get('date')
   if (!date) return NextResponse.json({ error: 'date required' }, { status: 400 })
 
   const client = await clientPromise
-  const doc = await client.db(DB).collection(COL).findOne({ date })
+  const doc = await client.db(DB_NAME).collection(DAILY_LOGS_COL).findOne({ date })
 
   if (!doc) return NextResponse.json(null)
 
@@ -39,7 +37,7 @@ export async function POST(req: NextRequest) {
   }
 
   const client = await clientPromise
-  await client.db(DB).collection(COL).updateOne(
+  await client.db(DB_NAME).collection(DAILY_LOGS_COL).updateOne(
     { date },
     { $set: { date, ...rest, ...flatSupplements, updatedAt: new Date() } },
     { upsert: true }

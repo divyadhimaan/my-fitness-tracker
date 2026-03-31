@@ -103,6 +103,7 @@ export interface DayLog {
     exercises: ExerciseLog[]
     duration: number     // minutes
     completed: boolean
+    notes?: string       // overall session notes
   }
   
   export async function fetchWorkoutLog(date: string): Promise<WorkoutLog | null> {

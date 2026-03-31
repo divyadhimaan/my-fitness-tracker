@@ -369,7 +369,7 @@ export default function WorkoutsPage() {
                 <p className="section-label">Workout notes</p>
                 <textarea
                   value={workoutLog.notes ?? ''}
-                  onChange={e => updateLog({ notes: e.target.value } as never)}
+                  onChange={e => updateLog({ notes: e.target.value })}
                   placeholder="How did this session feel? Energy, form, anything notable..."
                   rows={2}
                   className="w-full text-sm text-[#2A2520] bg-transparent outline-none resize-none placeholder:text-[#C8C0B8]"

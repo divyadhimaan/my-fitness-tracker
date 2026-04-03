@@ -1,32 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { TRAINING_DAY_MEALS, REST_DAY_MEALS } from '@/lib/data'
-
-const FOOD_GUIDES = [
-  {
-    label: 'Carbs', icon: '🌾', eat: 'Oats, brown bread, roti, quinoa, sweet potato, fruits, beans & lentils',
-    some: 'White rice, flavored yogurt, whole-grain crackers',
-    less: 'White bread, crackers, sugary cereals, pastries, cookies, donuts',
-  },
-  {
-    label: 'Protein', icon: '🥚', eat: 'Eggs & egg whites, paneer, tofu, fish, chicken, Greek yogurt, lentils & beans',
-    some: 'Uncultured cottage cheese, tofu, edamame, lamb',
-    less: 'Fried meats, protein bars, processed deli meats, high-fat sausages',
-  },
-  {
-    label: 'Fats', icon: '🥑', eat: 'Olive oil, avocado, almonds, walnuts, peanut butter, seeds, olives',
-    some: 'Coconut oil, dark chocolate, cream, flavored nut butters',
-    less: 'Butter, margarine, sunflower oil, chips, fried food, trans fats',
-  },
-]
-
-const TIPS = [
-  { icon: '🧂', tip: 'Salt & masalas are fine — they have minimal calories. Healthy can be tasty!' },
-  { icon: '🍳', tip: 'Cook however you like — raw, grilled, boiled, sautéed. Just no extra oil beyond what\'s allocated.' },
-  { icon: '🔄', tip: 'Club meals and switch them as needed. Just make sure you eat all meals on training days.' },
-  { icon: '🥦', tip: 'Hungry? Eat more vegetables. They\'re nearly zero calories and very filling.' },
-  { icon: '⏰', tip: 'Meal timings are flexible — adjust to when you\'re hungrier. Less in the morning, more at night is fine.' },
-]
+import { TRAINING_DAY_MEALS, REST_DAY_MEALS, FOOD_GUIDES, TIPS } from '@/lib/data'
 
 export default function DietPage() {
   const [tab, setTab] = useState<'training' | 'rest'>('training')

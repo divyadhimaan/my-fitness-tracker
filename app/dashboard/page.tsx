@@ -1,33 +1,14 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { fetchAllCheckins, CheckinData } from '@/lib/api'
+import { fetchAllCheckins, CheckinData, getLatestWeight, fetchWeightLog } from '@/lib/api'
 import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement,
   LineElement, BarElement, Title, Tooltip, Legend, Filler,
 } from 'chart.js'
 import { Line, Bar } from 'react-chartjs-2'
+import { START_WEIGHT, GOAL_WEIGHT, WEEKS, PHASES, MEASURES, STATUS_MESSAGES, TARGET_AVG_LOSS } from '@/lib/data'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler)
-
-const START_WEIGHT = 66.7
-const GOAL_WEIGHT  = 59
-const WEEKS        = 12
-
-const PHASES = [
-  { label: 'Foundation', weeks: '1–3',  range: [1,3],   color: '#E8B4A0' },
-  { label: 'Build',      weeks: '4–7',  range: [4,7],   color: '#A0C4B8' },
-  { label: 'Intensify',  weeks: '8–10', range: [8,10],  color: '#A0AED4' },
-  { label: 'Peak',       weeks: '11–12',range: [11,12], color: '#C4A0D4' },
-]
-
-const MEASURES = [
-  { key: 'waist',     label: 'Waist',  unit: 'in', lowerIsBetter: true  },
-  { key: 'hips',      label: 'Hips',   unit: 'in', lowerIsBetter: true  },
-  { key: 'chest',     label: 'Chest',  unit: 'in', lowerIsBetter: true  },
-  { key: 'rightArm',  label: 'Arm',    unit: 'in', lowerIsBetter: false },
-  { key: 'rightQuad', label: 'Quad',   unit: 'in', lowerIsBetter: false },
-  { key: 'rightCalf', label: 'Calf',   unit: 'in', lowerIsBetter: false },
-]
 
 function phaseForWeek(w: number) {
   if (w <= 3)  return PHASES[0]
@@ -40,10 +21,14 @@ const wLabels = Array.from({ length: WEEKS }, (_, i) => `W${i + 1}`)
 
 export default function DashboardPage() {
   const [rows, setRows] = useState<CheckinData[]>([])
+  const [weightLogs, setWeightLogs] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchAllCheckins().then(data => { setRows(data); setLoading(false) })
+    Promise.all([
+      fetchAllCheckins().then(data => setRows(data)),
+      fetchWeightLog().then(data => setWeightLogs(data))
+    ]).then(() => setLoading(false))
   }, [])
 
   if (loading) return (
@@ -54,7 +39,8 @@ export default function DashboardPage() {
 
   const logged    = rows.filter(r => r.weight)
   const wLogged   = logged.length
-  const latestW   = wLogged ? parseFloat(logged[wLogged - 1].weight) : START_WEIGHT
+  const sortedWeightLogs = weightLogs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  const latestW   = sortedWeightLogs.length > 0 ? sortedWeightLogs[0].weight : START_WEIGHT
   const lostKg    = (START_WEIGHT - latestW).toFixed(1)
   const toGo      = Math.max(latestW - GOAL_WEIGHT, 0).toFixed(1)
   const avgLoss   = wLogged > 1
@@ -96,13 +82,7 @@ export default function DashboardPage() {
     return { color: PHASES[pi].color, opacity }
   })
 
-  const statusMessages = [
-    'No check-ins logged yet — get started!',
-    'Week 1 complete — great start!', 'Foundation phase underway', 'Foundation phase complete!',
-    'Building phase underway', 'Halfway there — keep pushing!', 'Build phase strong', 'Build phase done!',
-    'Intensify phase — push harder!', 'Almost at peak!', 'Intensify phase complete!',
-    'Final stretch — peak phase!', '12 weeks done — incredible!',
-  ]
+  const statusMessages = STATUS_MESSAGES
 
   return (
     <div className="space-y-5 pt-2">
@@ -130,7 +110,7 @@ export default function DashboardPage() {
           {
             val: avgLoss ? `${avgLoss} kg` : '—',
             label: 'Avg loss/week',
-            sub: <span className="text-[#9A9087]">target 0.5–0.8 kg</span>,
+            sub: <span className="text-[#9A9087]">target {TARGET_AVG_LOSS}</span>,
           },
         ].map((c, i) => (
           <div key={i} className="bg-[#F0EDE8] rounded-xl p-3">

@@ -1,11 +1,13 @@
+import { START_WEIGHT } from './data'
+
 export interface DayLog {
-    date: string
-    water: number
-    meals: MealEntry[]
-    supplements: Record<string, boolean>
-    notes: string
-    dayType: 'training' | 'rest'
-  }
+  date: string
+  water: number
+  meals: MealEntry[]
+  supplements: Record<string, boolean>
+  notes: string
+  dayType: 'training' | 'rest'
+}
   
   export interface MealEntry {
     id: string
@@ -47,6 +49,13 @@ export interface DayLog {
     const res = await fetch('/api/checkins')
     if (!res.ok) return []
     return res.json()
+  }
+  
+  export async function getLatestWeight(): Promise<{ weight: number | null, startWeight: number }> {
+    const weightLogs = await fetchWeightLog()
+    const sortedLogs = weightLogs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    const latestWeight = sortedLogs.length > 0 ? sortedLogs[0].weight : null
+    return { weight: latestWeight, startWeight: START_WEIGHT }
   }
   
   export async function saveCheckin(data: CheckinData): Promise<void> {

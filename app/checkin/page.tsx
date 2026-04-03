@@ -1,7 +1,7 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
-import { fetchAllCheckins, saveCheckin, CheckinData } from '@/lib/api'
-import { CHECKIN_FIELDS, MILESTONES, PHASES } from '@/lib/data'
+import { fetchAllCheckins, saveCheckin, CheckinData, getLatestWeight } from '@/lib/api'
+import { CHECKIN_FIELDS, MILESTONES, PHASES, START_WEIGHT, GOAL_WEIGHT } from '@/lib/data'
 
 const phaseForWeek = (w: number) => {
   if (w <= 3) return PHASES[0]
@@ -21,14 +21,18 @@ export default function CheckinPage() {
   const [activeWeek, setActiveWeek] = useState(0)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [latestWeightData, setLatestWeightData] = useState<{ weight: number | null, startWeight: number } | null>(null)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    fetchAllCheckins().then(rows => {
-      if (rows.length > 0) {
-        setData(prev => prev.map((p, i) => rows.find(r => r.week === i) ?? p))
-      }
-    })
+    Promise.all([
+      fetchAllCheckins().then(rows => {
+        if (rows.length > 0) {
+          setData(prev => prev.map((p, i) => rows.find(r => r.week === i) ?? p))
+        }
+      }),
+      getLatestWeight().then(setLatestWeightData)
+    ])
   }, [])
 
   const update = (field: string, value: string) => {
@@ -50,11 +54,10 @@ export default function CheckinPage() {
   const current = data[activeWeek]
   const phase = phaseForWeek(activeWeek + 1)
 
-  const weights = data.map(d => parseFloat(d.weight)).filter(Boolean)
-  const startWeight = 66.7
-  const latestWeight = weights.length > 0 ? weights[weights.length - 1] : startWeight
+  const startWeight = START_WEIGHT
+  const latestWeight = latestWeightData?.weight ?? startWeight
   const lostSoFar = (startWeight - latestWeight).toFixed(1)
-  const toGoal = (latestWeight - 59).toFixed(1)
+  const toGoal = (latestWeight - GOAL_WEIGHT).toFixed(1)
 
   return (
     <div className="space-y-6 pt-2">

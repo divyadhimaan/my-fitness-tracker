@@ -17,6 +17,49 @@ export interface MealPlan {
   content: string
 }
 
+export interface MealEntry {
+  id: string
+  label: string
+  detail: string
+  time: string
+  done: boolean
+}
+
+export interface Supplement {
+  key: string
+  label: string
+  dose: string
+  icon: string
+  daily: boolean
+  weekly: boolean
+}
+
+export interface FoodGuide {
+  label: string
+  icon: string
+  eat: string
+  some: string
+  less: string
+}
+
+export interface Tip {
+  icon: string
+  tip: string
+}
+
+export interface Measure {
+  key: string
+  label: string
+  unit: string
+  lowerIsBetter: boolean
+}
+
+// ─── CONSTANTS ───────────────────────────────────────────────────────────────
+export const START_WEIGHT = 66.7
+export const GOAL_WEIGHT = 59
+export const WEEKS = 12
+export const TARGET_AVG_LOSS = '0.5–0.8 kg'
+
 // ─── PHASES ──────────────────────────────────────────────────────────────────
 export const PHASES = [
   {
@@ -40,6 +83,26 @@ export const PHASES = [
     desc: 'Maximum intensity. Full trainer protocols across every session. Track every rep, every meal, every measurement.',
   },
 ]
+
+// ─── MEASURES ─────────────────────────────────────────────────────────────────
+export const MEASURES: Measure[] = [
+  { key: 'waist',     label: 'Waist',  unit: 'in', lowerIsBetter: true  },
+  { key: 'hips',      label: 'Hips',   unit: 'in', lowerIsBetter: true  },
+  { key: 'chest',     label: 'Chest',  unit: 'in', lowerIsBetter: true  },
+  { key: 'rightArm',  label: 'Arm',    unit: 'in', lowerIsBetter: false },
+  { key: 'rightQuad', label: 'Quad',   unit: 'in', lowerIsBetter: false },
+  { key: 'rightCalf', label: 'Calf',   unit: 'in', lowerIsBetter: false },
+]
+
+// ─── DASHBOARD STATUS MESSAGES ────────────────────────────────────────────────
+export const STATUS_MESSAGES = [
+  'No check-ins logged yet — get started!',
+  'Week 1 complete — great start!', 'Foundation phase underway', 'Foundation phase complete!',
+  'Building phase underway', 'Halfway there — keep pushing!', 'Build phase strong', 'Build phase done!',
+  'Intensify phase — push harder!', 'Almost at peak!', 'Intensify phase complete!',
+  'Final stretch — peak phase!', '12 weeks done — incredible!',
+]
+
 
 // ─── SPLIT ────────────────────────────────────────────────────────────────────
 export const SPLIT = [
@@ -202,4 +265,55 @@ export const MILESTONES = [
   { week: 'End of Week 6', goal: 'Clothes feeling a little looser. Energy improving.', weight: '~63–64 kg' },
   { week: 'End of Week 9', goal: 'Visible change in waist and hips. Strength up significantly.', weight: '~61–62 kg' },
   { week: 'End of Week 12', goal: 'Strong, confident, fully self-sufficient as your own trainer.', weight: '~58–60 kg' },
+]
+
+// ─── DAILY LOGS ──────────────────────────────────────────────────────────────
+export const DEFAULT_TRAINING_MEALS: MealEntry[] = [
+  { id: 'morning', label: 'Morning drink', detail: '', time: 'On waking', done: false },
+  { id: 'preworkout', label: 'Pre-workout coffee', detail: '', time: '10 min before', done: false },
+  { id: 'meal1', label: 'Meal 1 — Post workout', detail: '', time: '', done: false },
+  { id: 'meal2', label: 'Meal 2 — Lunch', detail: '', time: '2–3pm', done: false },
+  { id: 'snack', label: 'Snack (optional)', detail: '', time: '5–6pm', done: false },
+  { id: 'meal3', label: 'Meal 3 — Dinner', detail: '', time: 'Evening', done: false },
+]
+
+export const DEFAULT_REST_MEALS: MealEntry[] = [
+  { id: 'morning', label: 'Morning drink', detail: '', time: 'On waking', done: false },
+  { id: 'meal1', label: 'Meal 1 (break fast)', detail: '', time: '12:30–1pm', done: false },
+  { id: 'snack', label: 'Snack', detail: '', time: '5–6pm', done: false },
+  { id: 'meal2', label: 'Meal 2 — Dinner', detail: '', time: '8:30–9:30pm', done: false },
+]
+
+export const SUPPLEMENTS: Supplement[] = [
+  { key: 'b12', label: 'B12', dose: '1 serving', icon: '+', daily: true, weekly: false },
+  { key: 'vitaminD', label: 'Vitamin D', dose: '60,000 IU', icon: '☀️', daily: false, weekly: true },
+]
+
+export const MEAL_COLORS = ['#E8B4A0', '#A0AED4', '#A0C4B8', '#C4A0D4', '#E8B4A0', '#A0C4B8']
+
+// ─── DIET GUIDES ─────────────────────────────────────────────────────────────
+export const FOOD_GUIDES: FoodGuide[] = [
+  {
+    label: 'Carbs', icon: '🌾', eat: 'Oats, brown bread, roti, quinoa, sweet potato, fruits, beans & lentils',
+    some: 'White rice, flavored yogurt, whole-grain crackers',
+    less: 'White bread, crackers, sugary cereals, pastries, cookies, donuts',
+  },
+  {
+    label: 'Protein', icon: '🥚', eat: 'Eggs & egg whites, paneer, tofu, fish, chicken, Greek yogurt, lentils & beans',
+    some: 'Uncultured cottage cheese, tofu, edamame, lamb',
+    less: 'Fried meats, protein bars, processed deli meats, high-fat sausages',
+  },
+  {
+    label: 'Fats', icon: '🥑', eat: 'Olive oil, avocado, almonds, walnuts, peanut butter, seeds, olives',
+    some: 'Coconut oil, dark chocolate, cream, flavored nut butters',
+    less: 'Butter, margarine, sunflower oil, chips, fried food, trans fats',
+  },
+]
+
+export const TIPS: Tip[] = [
+  { icon: '🧂', tip: 'Salt & masalas are fine — they have minimal calories. Healthy can be tasty!' },
+  { icon: '🍳', tip: 'Cook however you like — raw, grilled, boiled, sautéed. Just no extra oil beyond what\'s allocated.' },
+  { icon: '🔄', tip: 'Club meals and switch them as needed. Just make sure you eat all meals on training days.' },
+  { icon: '🥦', tip: 'Hungry? Eat more vegetables. They\'re nearly zero calories and very filling.' },
+  { icon: '⏰', tip: 'Meal timings are flexible — adjust to when you\'re hungrier. Less in the morning, more at night is fine.' },
 ]

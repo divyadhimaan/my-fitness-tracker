@@ -4,33 +4,7 @@ import {
   fetchDayLog, saveDayLog, DayLog, MealEntry,
   fetchWeightLog, saveWeightEntry, deleteWeightEntry, WeightEntry
 } from '@/lib/api'
-
-const START_WEIGHT = 66.7
-const GOAL_WEIGHT = 59
-
-const DEFAULT_TRAINING_MEALS: MealEntry[] = [
-  { id: 'morning', label: 'Morning drink', detail: '', time: 'On waking', done: false },
-  { id: 'preworkout', label: 'Pre-workout coffee', detail: '', time: '10 min before', done: false },
-  { id: 'meal1', label: 'Meal 1 — Post workout', detail: '', time: '', done: false },
-  { id: 'meal2', label: 'Meal 2 — Lunch', detail: '', time: '2–3pm', done: false },
-  { id: 'snack', label: 'Snack (optional)', detail: '', time: '5–6pm', done: false },
-  { id: 'meal3', label: 'Meal 3 — Dinner', detail: '', time: 'Evening', done: false },
-]
-
-const DEFAULT_REST_MEALS: MealEntry[] = [
-  { id: 'morning', label: 'Morning drink', detail: '', time: 'On waking', done: false },
-  { id: 'meal1', label: 'Meal 1 (break fast)', detail: '', time: '12:30–1pm', done: false },
-  { id: 'snack', label: 'Snack', detail: '', time: '5–6pm', done: false },
-  { id: 'meal2', label: 'Meal 2 — Dinner', detail: '', time: '8:30–9:30pm', done: false },
-]
-
-const SUPPLEMENTS = [
-  // { key: 'multivitamin', label: 'Multivitamin', dose: '1 tablet',  icon: '💊', daily: true,  weekly: false },
-  { key: 'b12', label: 'B12', dose: '1 serving', icon: '+', daily: true, weekly: false },
-  { key: 'vitaminD', label: 'Vitamin D', dose: '60,000 IU', icon: '☀️', daily: false, weekly: true },
-]
-
-const MEAL_COLORS = ['#E8B4A0', '#A0AED4', '#A0C4B8', '#C4A0D4', '#E8B4A0', '#A0C4B8']
+import { START_WEIGHT, GOAL_WEIGHT, DEFAULT_TRAINING_MEALS, DEFAULT_REST_MEALS, SUPPLEMENTS, MEAL_COLORS } from '@/lib/data'
 
 function todayKey() { return new Date().toISOString().slice(0, 10) }
 
